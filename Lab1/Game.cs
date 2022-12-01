@@ -5,23 +5,46 @@ namespace Lab1
     public class Game
     {
         private static int _idSeed = 32000;
+        private static Random _random = new Random();
 
-        private static readonly Random Random = new Random();
+        public int Id { get; }
+        public GameAccount Winner { get; }
+        public GameAccount Loser { get; }
+        public int RatingGame { get; }
 
-        public static void StartGame(GameAccount firstPlayer, GameAccount secondPlayer, int rating)
+        private Game(GameAccount winner, GameAccount loser, int rating)
         {
-            if (Random.Next(0, 2) == 0)
+            CheckRating(rating);
+            Winner = winner;
+            Loser = loser;
+            RatingGame = rating;
+            Id = _idSeed++;
+        }
+
+        private void CheckRating(int rating)
+        {
+            if (rating < 0)
             {
-                firstPlayer.WinGame(_idSeed, secondPlayer, rating);
-                secondPlayer.LoseGame(_idSeed, firstPlayer, rating);
+                throw new ArgumentOutOfRangeException(nameof(rating), "The rating played must be positive");
+            }
+        }
+
+        public static Game StartGame(GameAccount firstPlayer, GameAccount secondPlayer, int rating)
+        {
+            Game game;
+            if (_random.Next(0, 2) == 0)
+            {
+                game = new Game(firstPlayer, secondPlayer, rating);
             }
             else
             {
-                firstPlayer.LoseGame(_idSeed, secondPlayer, rating);
-                secondPlayer.WinGame(_idSeed, firstPlayer, rating);
+                game = new Game(secondPlayer, firstPlayer, rating);
             }
 
-            _idSeed++;
+            game.Winner.WinGame(game);
+            game.Loser.LoseGame(game);
+
+            return game;
         }
     }
 }

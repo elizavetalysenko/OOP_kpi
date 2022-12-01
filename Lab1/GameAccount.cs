@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Lab1
 {
@@ -7,8 +8,9 @@ namespace Lab1
     {
         public string UserName { get; }
         private int StartRating { get; }
-        private readonly List<StatsGame> _statsGames = new List<StatsGame>();
+        private readonly List<StatsResultGame> _statsGames = new List<StatsResultGame>();
         public int GamesCount => _statsGames.Count;
+
         public int CurrentRating
         {
             get
@@ -16,21 +18,7 @@ namespace Lab1
                 int rating = StartRating;
                 foreach (var item in _statsGames)
                 {
-                    if (item.Result == StatsGame.ResultGame.Win)
-                    {
-                        rating += item.Rating;
-                    }
-                    else
-                    {
-                        if (rating - item.Rating < 1)
-                        {
-                            rating = 1;
-                        }
-                        else
-                        {
-                            rating -= item.Rating;
-                        }
-                    }
+                    rating += item.RatingOperation;
                 }
 
                 return rating;
@@ -42,54 +30,50 @@ namespace Lab1
             UserName = userName;
             StartRating = startRating;
         }
-        
-        public void WinGame(int id, GameAccount opponent, int rating)
+
+        public void WinGame(Game game)
         {
-            CheckRating(rating);
-            _statsGames.Add(new StatsGame(id, opponent.UserName, StatsGame.ResultGame.Win, rating));
+            _statsGames.Add(new StatsResultGame(game.Id, game.Loser, StatsResultGame.ResultGame.Win,
+                game.RatingGame, game.RatingGame));
         }
 
-        public void LoseGame(int id, GameAccount opponent, int rating)
+        public void LoseGame(Game game)
         {
-            CheckRating(rating);
-            _statsGames.Add(new StatsGame(id, opponent.UserName, StatsGame.ResultGame.Lose, rating));
+            _statsGames.Add(new StatsResultGame(game.Id, game.Winner, StatsResultGame.ResultGame.Lose,
+                game.RatingGame, CheckLoserRating(game.RatingGame)));
         }
 
-        private void CheckRating(int rating)
+        private int CheckLoserRating(int rating)
         {
-            if (rating < 0)
+            if (CurrentRating - rating < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(rating), "The rating played must be positive");
+                return 1 - CurrentRating;
             }
+
+            return -rating;
         }
 
-        public void GetStats()
+        public string GetStats()
         {
-            Console.WriteLine($"Stats game {UserName}`s\nTotal games - {GamesCount}\nCurrent rating player - {CurrentRating}");
-            Console.WriteLine("Game List:\nId Game\tOpponent name\tRating game\tResult game\tPost-game rating");
-            int rating = StartRating;
+            StringBuilder str =
+                new StringBuilder(
+                    $"Stats game {UserName}`s\nTotal games - {GamesCount}\nCurrent rating player - {CurrentRating}\n");
+            str.AppendLine("Game List:\nId Game\tOpponent name\tRating game\tResult game\tRating Operation");
             foreach (var item in _statsGames)
             {
-                if (item.Result == StatsGame.ResultGame.Win)
+                if (item.Result == StatsResultGame.ResultGame.Win)
                 {
-                    rating += item.Rating;
+                    str.AppendLine(
+                        $"{item.IdGame}\t{item.Opponent.UserName}\t\t{item.Rating}\t\t{item.Result}\t\t+{item.RatingOperation}");
                 }
                 else
                 {
-                    if (rating - item.Rating < 1)
-                    {
-                        rating = 1;
-                    }
-                    else
-                    {
-                        rating -= item.Rating;
-                    }
+                    str.AppendLine(
+                        $"{item.IdGame}\t{item.Opponent.UserName}\t\t{item.Rating}\t\t{item.Result}\t\t{item.RatingOperation}");
                 }
-                Console.WriteLine($"{item.IdGame}\t{item.OpponentName}\t\t{item.Rating}\t\t{item.Result}\t\t{rating}");
             }
-            Console.WriteLine();
+
+            return str.AppendLine().ToString();
         }
-
-
     }
 }

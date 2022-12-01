@@ -1,6 +1,6 @@
 ﻿namespace Lab1
 {
-    public class StatsGame
+    public class StatsResultGame
     {
         public enum ResultGame
         {
@@ -8,16 +8,18 @@
             Lose
         }
         public ResultGame Result { get; }
-        public string OpponentName { get; }
+        public GameAccount Opponent { get; }
         public int IdGame { get; }
         public int Rating { get; }
+        public int RatingOperation { get; }
 
-        public StatsGame(int idGame, string opponentName, ResultGame resultGame, int rating)
+        public StatsResultGame(int idGame, GameAccount opponent, ResultGame resultGame, int rating, int ratingOperation)
         {
             IdGame = idGame;
-            OpponentName = opponentName;
+            Opponent = opponent;
             Result = resultGame;
             Rating = rating;
+            RatingOperation = ratingOperation;
         }
     }
 }
